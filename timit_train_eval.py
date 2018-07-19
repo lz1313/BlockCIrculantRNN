@@ -21,7 +21,7 @@ flags.DEFINE_boolean(
 )
 flags.DEFINE_string('level', 'phn', 'set the task level, phn, cha.')
 
-flags.DEFINE_string('cell', 'LSTM', 'set the rnncell to use, GRU and LSTM.')
+flags.DEFINE_string('cell', 'LSTM', 'set the rnncell to use, GRU, LSTM...')
 flags.DEFINE_string('activation', 'tanh',
                     'set the activation to use, sigmoid, tanh, relu, elu...')
 
@@ -39,12 +39,26 @@ flags.DEFINE_float(
     'set the threshold of gradient clipping, -1 denotes no clipping')
 flags.DEFINE_integer('partition_size', None, 'set partition_size for rnn')
 flags.DEFINE_string('input_data_dir',
-                    '/tmp/timit_preproc',
+                    '/usr/local/google/home/lzhe/timit_preproc',
                     'set the data root directory')
-flags.DEFINE_string('exp_dir', '/tmp/timit_exp',
+flags.DEFINE_string('exp_dir', '/usr/local/google/home/lzhe/timit_exp',
                     'set the log directory')
 
 FLAGS = flags.FLAGS
+
+
+def log_scalar(writer, tag, value, step):
+  """Log a scalar variable.
+  Parameter
+  ----------
+  tag : basestring
+      Name of the scalar
+  value
+  step : int
+      training iteration
+  """
+  summary = tf.Summary(value=[tf.Summary.Value(tag=tag, simple_value=value)])
+  writer.add_summary(summary, step)
 
 
 def main(_):
@@ -86,8 +100,8 @@ def main(_):
   hparams['max_time_steps'] = max_time_steps
   with tf.Graph().as_default():
     model = DRNN(FLAGS.cell, hparams, FLAGS.is_training)
-    writer = tf.summary.FileWriter(resultdir)
-
+    train_writer = tf.summary.FileWriter(resultdir + '/train')
+    test_writer = tf.summary.FileWriter(resultdir + '/test')
     with tf.Session(FLAGS.master) as sess:
       # restore from stored model
       if FLAGS.restore:
@@ -98,7 +112,7 @@ def main(_):
       else:
         print('Initializing')
         sess.run(model.initial_op)
-      writer.add_graph(sess.graph)
+      train_writer.add_graph(sess.graph)
       for epoch in range(FLAGS.num_epochs):
         ## training
         start = time.time()
@@ -138,6 +152,8 @@ def main(_):
                   feed_dict=feeddict)
               batch_errors[batch] = er
               if global_step % 10 == 0:
+                log_scalar(train_writer, 'CER', er / FLAGS.batch_size,
+                           global_step)
                 print('{} mode, global_step:{}, lr:{}, total:{}, '
                       'batch:{}/{},epoch:{}/{},train loss={:.3f},mean train '
                       'CER={:.3f}'.format(
@@ -154,6 +170,7 @@ def main(_):
                   ],
                   feed_dict=feeddict)
               batch_errors[batch] = er
+              log_scalar(test_writer, 'CER', er / FLAGS.batch_size, global_step)
               print('{} mode, global_step:{}, total:{}, batch:{}/{},test '
                     'loss={:.3f},mean test CER={:.3f}'.format(
                         FLAGS.level, global_step, total_n, batch + 1,
@@ -170,6 +187,7 @@ def main(_):
               er = get_edit_distance([pre.values], [y.values], True,
                                      FLAGS.level)
               if global_step % 10 == 0:
+                log_scalar(train_writer, 'PER', er, global_step)
                 print(
                     '{} mode, global_step:{}, lr:{}, total:{}, '
                     'batch:{}/{},epoch:{}/{},train loss={:.3f},mean train '
@@ -184,12 +202,14 @@ def main(_):
                   feed_dict=feeddict)
               er = get_edit_distance([pre.values], [y.values], True,
                                      FLAGS.level)
+              log_scalar(test_writer, 'PER', er, global_step)
               print('{} mode, global_step:{}, total:{}, batch:{}/{},test '
                     'loss={:.3f},mean test PER={:.3f}'.format(
                         FLAGS.level, global_step, total_n, batch + 1,
                         len(batched_random_idx), l, er))
               batch_errors[batch] = er * len(batch_seq_length)
 
+          # NOTE:
           if er / FLAGS.batch_size == 1.0:
             break
 
