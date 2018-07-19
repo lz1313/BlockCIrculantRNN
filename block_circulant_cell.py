@@ -108,7 +108,7 @@ def _add_variable(input_dim,
                                                  partition_size)
       weights = add_fn(
           name,
-          shape=[weight_shape, 1],
+          shape=[weight_shape],
           partitioner=partitioner,
           initializer=initializer)
       weights = tf.gather(weights, kernel_indx)
