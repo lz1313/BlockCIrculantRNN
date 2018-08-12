@@ -151,7 +151,8 @@ class DRNN(object):
         tf.nn.ctc_loss(self.y, self.logits3d, self.seq_length))
     opt = tf.train.AdamOptimizer(self.hparams['learning_rate'])
     clip_gradient_norm = self.hparams[
-        'clip_gradient_norm'] if 'clip_gradient_norm' > 0 else 0
+        'clip_gradient_norm'] if self.hparams[
+        'clip_gradient_norm'] > 0 else 0
     self.train_op = slim.learning.create_train_op(
         self.loss, opt, clip_gradient_norm=clip_gradient_norm)
 
