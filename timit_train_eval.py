@@ -39,9 +39,9 @@ flags.DEFINE_float(
     'set the threshold of gradient clipping, -1 denotes no clipping')
 flags.DEFINE_integer('partition_size', None, 'set partition_size for rnn')
 flags.DEFINE_string('input_data_dir',
-                    '/usr/local/google/home/lzhe/timit_preproc',
+                    'timit_preproc',
                     'set the data root directory')
-flags.DEFINE_string('exp_dir', '/usr/local/google/home/lzhe/timit_exp',
+flags.DEFINE_string('exp_dir', 'timit_exp',
                     'set the log directory')
 
 FLAGS = flags.FLAGS
