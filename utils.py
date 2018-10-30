@@ -244,3 +244,24 @@ def load_batched_data(mfccPath, labelPath, batchSize, level):
       _read_data(os.path.join(labelPath, fn))
       for fn in tf.gfile.ListDirectory(labelPath)
   ], batchSize, level) + (len(tf.gfile.ListDirectory(mfccPath)),)
+def count_params(model, mode='trainable'):
+    ''' count all parameters of a tensorflow graph
+    '''
+    if mode == 'all':
+        num = np.sum([np.product([xi.value for xi in x.get_shape()]) for x in model.var_op])
+    elif mode == 'trainable':
+        num = np.sum([np.product([xi.value for xi in x.get_shape()]) for x in model.var_trainable_op])
+    else:
+        raise TypeError('mode should be all or trainable.')
+    print('number of '+mode+' parameters: '+str(num))
+    return num
+def check_path_exists(path):
+    """ check a path exists or not
+    """
+    if isinstance(path, list):
+        for p in path:
+            if not os.path.exists(p):
+                os.makedirs(p)
+    else:
+        if not os.path.exists(path):
+            os.makedirs(path)

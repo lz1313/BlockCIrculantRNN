@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow.python.layers import base as base_layer
 from tensorflow.python.platform import flags
 
-flags.DEFINE_boolean("usefft", False, "set whether to use fft calculation")
+flags.DEFINE_boolean("usefft", True, "set whether to use fft calculation")
 FLAGS = flags.FLAGS
 _BIAS_VARIABLE_NAME = "bias"
 _WEIGHTS_VARIABLE_NAME = "kernel"
