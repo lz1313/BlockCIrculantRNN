@@ -1,13 +1,3 @@
-# encoding: utf-8
-# ******************************************************
-# Author       : zzw922cn
-# Last modified: 2017-12-09 11:00
-# Email        : zzw922cn@gmail.com
-# Filename     : libri_train.py
-# Description  : Training models on LibriSpeech dataset for Automatic Speech Recognition
-# ******************************************************
-
-
 import time
 import datetime
 import os
@@ -57,9 +47,9 @@ flags.DEFINE_float(
     'set the threshold of gradient clipping, -1 denotes no clipping')
 flags.DEFINE_integer('partition_size', 4, 'set partition_size for rnn')
 flags.DEFINE_string('input_data_dir',
-                    '/data2/zli/libri_process',
+                    'libri_process',
                     'set the data root directory')
-flags.DEFINE_string('exp_dir', '/data2/zli/libri_exp_block_4',
+flags.DEFINE_string('exp_dir', 'libri_exp_block_4',
                     'set the log directory')
 
 FLAGS = flags.FLAGS
